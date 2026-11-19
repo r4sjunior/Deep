@@ -232,3 +232,9 @@
   #tabs .brand img,#tabs .brand .sign{display:none}
   #tabs .brand{padding-bottom:12px}
 }
+
+/* exercícios: resposta obrigatória */
+.field.falta textarea.journal{box-shadow:inset 0 0 0 1.5px #b5524a,0 0 0 4px rgba(181,82,74,.14);animation:shake .4s}
+.field.falta .wc{color:#b5524a;font-weight:600}
+@keyframes shake{20%,60%{transform:translateX(-5px)}40%,80%{transform:translateX(5px)}}
+@media (prefers-reduced-motion:reduce){.field.falta textarea.journal{animation:none}}

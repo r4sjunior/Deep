@@ -1,9 +1,8 @@
 import { useEffect, useState } from "react";
 import Icon from "../components/Icon.jsx";
 import { Split } from "../components/Chrome.jsx";
-import { useApp, S, commit, resetar } from "../lib/store.js";
-import { cena, modal, confirmar, toast } from "../lib/ui.jsx";
-import { definir } from "../lib/nav.js";
+import { useApp, S, commit } from "../lib/store.js";
+import { cena, modal, toast } from "../lib/ui.jsx";
 import { imprimir, linkWhats } from "../lib/acoes.jsx";
 import { perfil, testeOk, nomesTop } from "../lib/regras.js";
 import { CONTATO } from "../data/jornada.jsx";
@@ -40,13 +39,6 @@ export default function Ita({ anim }) {
     `Olá, Ita! Fiz o mergulho DEEP${p ? ` e meu perfil predominante deu ${nomesTop(p.top)} (${p.pct[p.top[0]]}%)` : ""}. Quero agendar o Diagnóstico da Alma.`
   );
 
-  const recomecar = () =>
-    confirmar(
-      "Recomeçar do zero?",
-      "Todas as respostas, textos e luzes deste aparelho serão apagados. Isso não pode ser desfeito.",
-      () => { resetar(); definir([{ rota: "onb" }], "fade"); },
-      "Apagar tudo"
-    );
 
   return (
     <Split aba anim={anim} titulo="Ita Batista" img="img/autora.jpg" alt="Ita Batista" artCls="author"
@@ -89,9 +81,6 @@ export default function Ita({ anim }) {
           </button>
           <button className="lk" id="nomeB" onClick={() => modal((close) => <NomeSheet close={close} />)}>
             <span className="ic"><Icon n="pen" /></span><div><b>Alterar meu nome</b><span>{S.nome || "Sem nome"}</span></div>
-          </button>
-          <button className="lk" id="reset" onClick={recomecar}>
-            <span className="ic danger"><Icon n="redo" /></span><div><b className="danger">Recomeçar a jornada</b><span>Apaga as respostas deste aparelho</span></div>
           </button>
         </div>
       </div>

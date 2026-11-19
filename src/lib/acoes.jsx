@@ -1,5 +1,5 @@
 import { S, commit } from "./store.js";
-import { ui, modal, haptic, explosao, bolhas, confirmar } from "./ui.jsx";
+import { ui, modal, haptic, explosao, bolhas } from "./ui.jsx";
 import { aba, ir, definir } from "./nav.js";
 import { faseFeita, faseDe, perfil, testeOk, palavras, nomesTop } from "./regras.js";
 import { EX, FASES, CONTATO } from "../data/jornada.jsx";
@@ -56,20 +56,6 @@ export function concluirPasso(fid, k) {
   if (k && !S.feito[k]) { S.feito[k] = true; commit(); }
   definir([{ rota: "aba", arg: "jornada" }, { rota: "fase", arg: fid }], "pop");
   checarFase(faseDe(fid));
-}
-
-export function refazerTeste(pilhaBase) {
-  confirmar(
-    "Refazer o teste?",
-    "Suas respostas anteriores serão substituídas. O autoconhecimento acontece em camadas — é natural o resultado mudar.",
-    () => {
-      S.respostas = Array(25).fill(null);
-      commit();
-      if (pilhaBase) definir(pilhaBase, "fade");
-      ir("quiz", { f: "despertar", i: 0 });
-    },
-    "Refazer"
-  );
 }
 
 export const linkWhats = (texto) =>

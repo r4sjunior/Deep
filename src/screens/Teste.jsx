@@ -4,7 +4,7 @@ import { Split, Placas } from "../components/Chrome.jsx";
 import { useApp, S, commit } from "../lib/store.js";
 import { cena, haptic, toast, bolhas, explosao } from "../lib/ui.jsx";
 import { aba, ir, trocar, voltarHist } from "../lib/nav.js";
-import { checarFase, luz, refazerTeste } from "../lib/acoes.jsx";
+import { checarFase, luz } from "../lib/acoes.jsx";
 import { perfil, respondidas, testeOk, nomesTop } from "../lib/regras.js";
 import { ORDEM, PERFIS } from "../data/perfis.js";
 import { PERGUNTAS } from "../data/perguntas.js";
@@ -26,10 +26,7 @@ export function TesteIntro({ arg: fid, anim }) {
         <h1 className="display">Águia, Gato, Tubarão ou Lobo?</h1>
       </>}
       dock={feitas === 25 ? (
-        <div className="row">
-          <button className="btn line" id="refaz" onClick={() => refazerTeste()}><Icon n="redo" /> Refazer</button>
-          <button className="btn gold" id="ver" onClick={() => { haptic(); aba("perfil"); }}>Ver resultado</button>
-        </div>
+        <button className="btn gold block" id="ver" onClick={() => { haptic(); aba("perfil"); }}>Ver meu resultado</button>
       ) : (
         <button className="btn gold block" id="go" onClick={comecar}>
           {feitas ? `Continuar da pergunta ${feitas + 1}` : "Começar o mergulho"}
@@ -71,6 +68,10 @@ export function Quiz({ arg }) {
   const timers = useRef([]);
   const later = (fn, ms) => timers.current.push(setTimeout(fn, ms));
 
+  // o teste é respondido uma única vez: concluído, fica trancado
+  const fechado = useRef(testeOk()).current;
+  useEffect(() => { if (fechado) { toast("O teste já foi respondido", "lock"); aba("perfil"); } }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
   const [q, ops] = PERGUNTAS[i];
   const sel = app.respostas[i];
 
@@ -92,7 +93,7 @@ export function Quiz({ arg }) {
   };
 
   const escolher = (j, e) => {
-    if (travado.current) return;
+    if (travado.current || fechado) return;
     travado.current = true;
     haptic(10);
     const r = e.currentTarget.getBoundingClientRect(), d = Math.max(r.width, r.height);

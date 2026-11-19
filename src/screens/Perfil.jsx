@@ -6,7 +6,6 @@ import { gerarCard } from "../lib/card.js";
 import { useApp, S, commit } from "../lib/store.js";
 import { cena, haptic, toast, modal } from "../lib/ui.jsx";
 import { definir, ir } from "../lib/nav.js";
-import { refazerTeste } from "../lib/acoes.jsx";
 import { perfil, respondidas, testeOk, nomesTop } from "../lib/regras.js";
 import { ORDEM, PERFIS } from "../data/perfis.js";
 
@@ -193,10 +192,7 @@ export default function Perfil({ anim }) {
       </div>
 
       <button className="btn gold block" id="story" style={{ marginTop: 24 }} onClick={abrirCard}><Icon n="spark" /> Criar meu card para Stories</button>
-      <div className="row" style={{ marginTop: 10 }}>
-        <button className="btn line" id="refaz" onClick={() => refazerTeste(BASE_TESTE)}><Icon n="redo" /> Refazer</button>
-        <button className="btn plum" id="share" onClick={compartilhar}><Icon n="share" /> Texto</button>
-      </div>
+      <button className="btn plum block" id="share" style={{ marginTop: 10 }} onClick={compartilhar}><Icon n="share" /> Compartilhar em texto</button>
     </Split>
   );
 }

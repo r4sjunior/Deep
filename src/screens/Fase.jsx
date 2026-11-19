@@ -3,7 +3,7 @@ import { createPortal } from "react-dom";
 import Icon from "../components/Icon.jsx";
 import { Split, Placas } from "../components/Chrome.jsx";
 import { useApp, S, persistir } from "../lib/store.js";
-import { cena, haptic, toast, bolhas, confirmar, reduz } from "../lib/ui.jsx";
+import { cena, haptic, toast, bolhas, reduz } from "../lib/ui.jsx";
 import { voltarHist } from "../lib/nav.js";
 import { abrirPasso, concluirPasso, luz } from "../lib/acoes.jsx";
 import { faseDe, infoPasso, passoFeito, passoLivre, palavras, escreveuEm } from "../lib/regras.js";
@@ -93,8 +93,7 @@ function Respiracao({ onFim }) {
         <div className="bcirc"><b>{reduz ? "Respire" : fase % 2 === 0 ? "Inspire" : "Expire"}</b></div>
         <div className="cnt">{reduz ? "no seu tempo" : `${Math.min(3, Math.floor(fase / 2) + 1)} de 3`}</div>
         <div className="row">
-          <button className="btn line" id="pular" onClick={onFim}>Pular</button>
-          <button className="btn gold" onClick={onFim}>Estou pronto(a)</button>
+          <button className="btn gold" id="pronto" onClick={onFim}>Estou pronto(a)</button>
         </div>
       </div>
     </div>,
@@ -106,6 +105,7 @@ export function Exercicio({ arg: { f, k }, anim }) {
   const e = EX[k], F = faseDe(f);
   const [textos, setTextos] = useState(() => ({ ...(S.textos[k] || {}) }));
   const [salvo, setSalvo] = useState(false);
+  const [faltando, setFaltando] = useState([]);
   const [respirar, setRespirar] = useState(() => !S.feito[k] && !escreveuEm(k));
   const tSalvo = useRef(0);
 
@@ -116,6 +116,7 @@ export function Exercicio({ arg: { f, k }, anim }) {
 
   const escrever = (c, v) => {
     setTextos((t) => ({ ...t, [c]: v }));
+    if (palavras(v)) setFaltando((l) => l.filter((x) => x !== c));
     S.textos[k] = { ...(S.textos[k] || {}), [c]: v };
     persistir();
     setSalvo(true);
@@ -123,19 +124,25 @@ export function Exercicio({ arg: { f, k }, anim }) {
     tSalvo.current = setTimeout(() => setSalvo(false), 1400);
   };
 
+  // todas as perguntas são obrigatórias: só conclui com todos os campos escritos
   const concluir = () => {
-    const escreveu = escreveuEm(k);
-    const fazer = () => {
-      haptic(14);
-      if (!S.feito[k]) {
-        luz(escreveu ? 3 : 1);
-        toast(escreveu ? "+3 luzes · obrigado pela sua verdade" : "+1 luz · volte para escrever quando quiser");
-      }
-      concluirPasso(f, k);
-    };
-    if (!escreveu && !S.feito[k]) {
-      confirmar("Seguir sem escrever?", "Tudo bem seguir agora e voltar depois pelo Diário. Mas lembre: este é um material para ser vivido.", fazer, "Seguir assim");
-    } else fazer();
+    const vazios = e.campos.map(([c]) => c).filter((c) => !palavras(textos[c]));
+    if (vazios.length) {
+      haptic(30);
+      setFaltando(vazios);
+      toast(vazios.length === e.campos.length
+        ? "Escreva sua resposta para concluir o exercício"
+        : `Falta responder ${vazios.length === 1 ? "1 pergunta" : vazios.length + " perguntas"}`, "pen");
+      const ta = document.querySelector(`textarea[data-c="${vazios[0]}"]`);
+      if (ta) { ta.scrollIntoView({ behavior: reduz ? "auto" : "smooth", block: "center" }); ta.focus({ preventScroll: true }); }
+      return;
+    }
+    haptic(14);
+    if (!S.feito[k]) {
+      luz(3);
+      toast("+3 luzes · obrigado pela sua verdade");
+    }
+    concluirPasso(f, k);
   };
 
   return (
@@ -160,10 +167,10 @@ export function Exercicio({ arg: { f, k }, anim }) {
           {e.campos.map(([c, l], i) => {
             const n = palavras(textos[c]);
             return (
-              <label className="field" key={c}>
+              <label className={"field" + (faltando.includes(c) ? " falta" : "")} key={c}>
                 <div className="prompt">{e.campos.length > 1 && <i>{i + 1}</i>}{l}</div>
                 <Caderno id={c} valor={textos[c] || ""} onChange={(v) => escrever(c, v)} />
-                <div className="wc">{n ? `${n} palavra${n > 1 ? "s" : ""}` : ""}</div>
+                <div className="wc">{n ? `${n} palavra${n > 1 ? "s" : ""}` : faltando.includes(c) ? "resposta obrigatória" : ""}</div>
               </label>
             );
           })}
