@@ -3,6 +3,7 @@
 export const EX = {
   ex1: {
     n: 1, titulo: "O Primeiro Encontro com Você", img: "img/ex1.jpg", min: 8,
+    lembre: "Ser verdadeiro consigo mesmo é um dos caminhos mais honestos para que a transformação aconteça.",
     intro: [
       "Talvez essa seja uma das primeiras vezes em que você realmente irá parar para se observar com mais profundidade, sem máscaras, sem personagens e sem a necessidade de corresponder às expectativas dos outros.",
       "Aqui não existe certo ou errado. Existe apenas a sua percepção sobre quem você é hoje. Então respire fundo… e simplesmente escreva."
@@ -11,6 +12,7 @@ export const EX = {
   },
   ex3: {
     n: 3, titulo: "O Que Existe Aí Dentro?", img: "img/ex3.jpg", min: 6,
+    lembre: "Aqui, você não precisa impressionar ninguém.",
     intro: [
       "Feche os olhos por alguns instantes e traga à tona aquilo que mais te incomodou nos exercícios anteriores. Em qual momento você sentiu desconforto? O que mexeu com você? O que despertou emoções que talvez estivessem guardadas há muito tempo?",
       "Escreva sobre o que você está sentindo. Sem julgamentos. Sem críticas. Sem a preocupação de escrever bonito. Aqui, você não precisa impressionar ninguém."
@@ -19,6 +21,7 @@ export const EX = {
   },
   ex4: {
     n: 4, titulo: "O Que Pode Ser Transformado?", img: "img/ex4.jpg", min: 6,
+    lembre: "Esse exercício não é sobre cobrança. É sobre consciência.",
     intro: [
       "O que você percebe que precisa mudar? Quais comportamentos, pensamentos ou emoções você identifica que já não fazem mais sentido carregar?",
       "Esse exercício não é sobre cobrança. É sobre consciência."
@@ -27,6 +30,7 @@ export const EX = {
   },
   ex5: {
     n: 5, titulo: "Reconhecendo Sua Potência", img: "img/potencia.jpg", min: 6,
+    lembre: "Use esse espaço com verdade e generosidade consigo mesmo.",
     intro: [
       "Dom é aquilo que já nasceu com você. É algo natural, que faz parte da sua essência. Talento é aquilo que foi desenvolvido ao longo da sua caminhada, através das experiências, aprendizados e vivências da vida.",
       "Não minimize suas capacidades. Não se diminua. Não esconda sua luz."
@@ -35,6 +39,7 @@ export const EX = {
   },
   ex6: {
     n: 6, titulo: "Percebendo Sua Transformação", img: "img/transformacao.jpg", min: 6,
+    lembre: "Aqui não é momento de cobrança. É momento de reconhecimento.",
     intro: [
       "O que você descobriu sobre si mesmo? Quais percepções surgiram ao longo dos exercícios? O quanto você passou a se observar mais?",
       "Aqui não é momento de cobrança. É momento de reconhecimento."
@@ -43,6 +48,7 @@ export const EX = {
   },
   ex7: {
     n: 7, titulo: "A História de Quem Você Está Se Tornando", img: "img/historia.jpg", min: 12,
+    lembre: "Sem limitações, sem medo e, o mais importante, sem pressa.",
     intro: [
       "Este exercício será uma autobiografia resumida da sua vida, das suas emoções, aprendizados, percepções e anseios.",
       "Escreva sobre quem você foi. Sobre quem você acredita estar se tornando. Sobre suas dores, suas descobertas, seus sonhos e sobre aquilo que deseja viver daqui para frente. Sem limitações, sem medo e, o mais importante, sem pressa."
@@ -147,6 +153,18 @@ export const PENSAMENTOS = [
   "Viver deve ser leve. E essa leveza só acontece quando voltamos para nossa essência.",
   "Você não precisa ter todas as respostas para dar o próximo passo.",
   "A cura acontece quando paramos de fugir de nós mesmos."
+];
+
+/** Cartas do dia: frases do próprio e-book. */
+export const CARTAS = [
+  ...PENSAMENTOS,
+  "Quanto mais eu me conheço, mais verdadeiro eu me torno.",
+  "O questionamento é um dos primeiros passos do despertar.",
+  "Não minimize suas capacidades. Não se diminua. Não esconda sua luz.",
+  "O objetivo deste material não é trazer perfeição. É trazer consciência.",
+  "Algumas histórias merecem continuar sendo escritas a cada dia.",
+  "É no despertar que criamos força para dar mais um passo.",
+  "Aprender a se acolher. Se acolher sem culpa. Sem julgamento."
 ];
 
 export const CONTATO = {

@@ -9,6 +9,7 @@ import {
   infoPasso, passoFeito, passoLivre, perfil, respondidas, testeOk, palavras, exEscritos, totalPalavras, nomesTop
 } from "../lib/regras.js";
 import { EX, FASES } from "../data/jornada.jsx";
+import { CONQUISTAS } from "../lib/conquistas.js";
 
 const ordem = (p) => (p.t === "teste" ? 2 : EX[p.k].n);
 const ITENS = FASES.flatMap((f) => f.passos.map((p, j) => ({ f, j, p })))
@@ -52,7 +53,7 @@ export default function Diario({ anim }) {
           <div><b>{S.luzes}</b><span>luzes acesas</span></div>
         </div>
         <div className="sec"><h3>Exercícios</h3><span>toque para abrir</span></div>
-        <div>
+        <div className="entries">
           {ITENS.map(({ f, j, p }) => {
             const inf = infoPasso(p), livre = passoLivre(f, j) || passoFeito(p);
             return (
@@ -68,7 +69,20 @@ export default function Diario({ anim }) {
             );
           })}
         </div>
-        <button className="btn line block" id="pdf" style={{ marginTop: 8 }} onClick={imprimir}><Icon n="down" /> Salvar meu diário em PDF</button>
+        <div className="sec"><h3>Conquistas</h3><span>{CONQUISTAS.filter((c) => c.ok()).length} de {CONQUISTAS.length}</span></div>
+        <div className="medals">
+          {CONQUISTAS.map((c) => {
+            const ok = c.ok();
+            return (
+              <div key={c.id} className={"medal" + (ok ? "" : " off")} title={c.desc}>
+                <div className="m">{ok ? (c.letra || <Icon n={c.icone} />) : <Icon n="lock" />}</div>
+                <b>{c.nome}</b>
+                <span>{c.desc}</span>
+              </div>
+            );
+          })}
+        </div>
+        <button className="btn line block" id="pdf" style={{ marginTop: 22 }} onClick={imprimir}><Icon n="down" /> Salvar meu diário em PDF</button>
       </div>
     </Page>
   );

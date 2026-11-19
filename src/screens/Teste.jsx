@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import Icon from "../components/Icon.jsx";
-import { Page, Topo } from "../components/Chrome.jsx";
+import { Split, Placas } from "../components/Chrome.jsx";
 import { useApp, S, commit } from "../lib/store.js";
 import { cena, haptic, toast, bolhas, explosao } from "../lib/ui.jsx";
 import { aba, ir, trocar, voltarHist } from "../lib/nav.js";
@@ -20,15 +20,21 @@ export function TesteIntro({ arg: fid, anim }) {
   };
 
   return (
-    <Page anim={anim} cls="notab">
-      <Topo titulo="Exercício 2" />
-      <div className="hero" style={{ height: 400 }}>
-        <img src="img/ex2.jpg" alt="" />
-        <div className="in">
-          <div className="eyebrow">Exercício 2 · Buscando respostas</div>
-          <h1 className="display" style={{ fontSize: 40 }}>Águia, Gato, Tubarão ou Lobo?</h1>
+    <Split anim={anim} titulo="Exercício 2" img="img/ex2.jpg"
+      over={<>
+        <Placas a="Exercício 2" b="Entendendo Seu Perfil Comportamental" />
+        <h1 className="display">Águia, Gato, Tubarão ou Lobo?</h1>
+      </>}
+      dock={feitas === 25 ? (
+        <div className="row">
+          <button className="btn line" id="refaz" onClick={() => refazerTeste()}><Icon n="redo" /> Refazer</button>
+          <button className="btn gold" id="ver" onClick={() => { haptic(); aba("perfil"); }}>Ver resultado</button>
         </div>
-      </div>
+      ) : (
+        <button className="btn gold block" id="go" onClick={comecar}>
+          {feitas ? `Continuar da pergunta ${feitas + 1}` : "Começar o mergulho"}
+        </button>
+      )}>
       <div className="stagger">
         <p className="sub" style={{ marginTop: 16 }}>Este teste vai te ajudar a compreender melhor alguns comportamentos, padrões e características que influenciam diretamente a forma como você age, sente, reage e se relaciona com a vida.</p>
         <div className="animals">
@@ -36,27 +42,24 @@ export function TesteIntro({ arg: fid, anim }) {
         </div>
         <div className="pills">
           <span className="pill"><Icon n="q" /> 25 perguntas</span>
+          <span className="pill"><Icon n="wave" /> 100 m de mergulho</span>
           <span className="pill"><Icon n="clock" /> ~5 min</span>
-          <span className="pill"><Icon n="check" /> 1 escolha cada</span>
         </div>
-        <p>Ao responder, procure não racionalizar demais. Escolha aquilo que realmente se aproxima de quem você é <i>hoje</i>.</p>
+        <p>Cada resposta te leva 4 metros mais fundo. Procure não racionalizar demais: escolha aquilo que realmente se aproxima de quem você é <i>hoje</i>.</p>
         <div className="quote" style={{ margin: "18px 0 10px" }}>O objetivo do autoconhecimento não é criar rótulos, mas despertar consciência.</div>
       </div>
-      <div className="dock">
-        {feitas === 25 ? (
-          <div className="row">
-            <button className="btn line" id="refaz" onClick={() => refazerTeste()}><Icon n="redo" /> Refazer</button>
-            <button className="btn gold" id="ver" onClick={() => { haptic(); aba("perfil"); }}>Ver resultado</button>
-          </div>
-        ) : (
-          <button className="btn gold block" id="go" onClick={comecar}>
-            {feitas ? `Continuar da pergunta ${feitas + 1}` : "Começar o teste"}
-          </button>
-        )}
-      </div>
-    </Page>
+    </Split>
   );
 }
+
+/** Zonas do mergulho (metros). */
+const ZONAS = [
+  [0, "Superfície"],
+  [25, "Zona de luz"],
+  [50, "Crepúsculo"],
+  [75, "O profundo"]
+];
+const zona = (m) => [...ZONAS].reverse().find(([z]) => m >= z)[1];
 
 export function Quiz({ arg }) {
   const app = useApp();
@@ -98,7 +101,13 @@ export function Quiz({ arg }) {
     const nova = S.respostas[i] == null;
     S.respostas[i] = j;
     commit();
-    if (nova) luz(1);
+    if (nova) {
+      luz(1);
+      // marcos do mergulho: 25 m, 50 m e 75 m
+      const antes = i * 4, depois = (i + 1) * 4;
+      const marco = ZONAS.find(([z]) => z > 0 && antes < z && depois >= z);
+      if (marco) { bolhas(14); later(() => toast(`${marco[0]} m · ${marco[1]}. Continue descendo.`, "wave"), 150); }
+    }
     later(() => {
       if (i < 24) { setSaindo(true); later(() => goto(i + 1, "r"), 250); }
       else fim();
@@ -108,37 +117,48 @@ export function Quiz({ arg }) {
   const profundidade = (i + (sel != null ? 1 : 0)) * 4;
 
   return (
-    <div className="quiz anim-fade">
-      <div className="qtop">
-        <button className="ib" id="x" aria-label="Sair do teste" onClick={() => { haptic(); voltarHist(); }}><Icon n="close" /></button>
-        <div className="meta">{i + 1} / 25</div>
-        <div className="depth"><Icon n="wave" /><span>{profundidade} m</span></div>
-      </div>
-      <div className="segs">
-        {PERGUNTAS.map((_, k) => <i key={k} className={app.respostas[k] != null ? "on" : k === i ? "now" : ""} />)}
-      </div>
-      <div className="qbody">
-        <div key={i} className={`paper qcard ${saindo ? "out" : "in-" + dir}`}>
-          <div className="eyebrow">Pergunta {i + 1}</div>
-          <h2 className="display">{q}</h2>
-          <div className="opts" role="radiogroup">
-            {ops.map(([, t], j) => (
-              <button key={j} className={"opt" + (sel === j ? " sel" : "")} role="radio" aria-checked={sel === j} onClick={(e) => escolher(j, e)}>
-                <span className="rd" />
-                <span>{t}</span>
-                {ripple && ripple.j === j && (
-                  <span key={ripple.id} className="ripple" style={{ width: ripple.d, height: ripple.d, left: ripple.x, top: ripple.y }} />
-                )}
-              </button>
-            ))}
+    <div className="qlayout">
+      <div className="quiz anim-fade">
+        <div className="qtop">
+          <button className="ib" id="x" aria-label="Sair do teste" onClick={() => { haptic(); voltarHist(); }}><Icon n="close" /></button>
+          <div className="meta">{i + 1} / 25</div>
+          <div className="depth"><span><Icon n="wave" />{profundidade} m</span><small>{zona(profundidade)}</small></div>
+        </div>
+        <div className="segs">
+          {PERGUNTAS.map((_, k) => <i key={k} className={app.respostas[k] != null ? "on" : k === i ? "now" : ""} />)}
+        </div>
+        <div className="qbody">
+          <div key={i} className={`paper qcard ${saindo ? "out" : "in-" + dir}`}>
+            <div className="eyebrow">Pergunta {i + 1}</div>
+            <h2 className="display">{q}</h2>
+            <div className="opts" role="radiogroup">
+              {ops.map(([, t], j) => (
+                <button key={j} className={"opt" + (sel === j ? " sel" : "")} role="radio" aria-checked={sel === j} onClick={(e) => escolher(j, e)}>
+                  <span className="rd" />
+                  <span>{t}</span>
+                  {ripple && ripple.j === j && (
+                    <span key={ripple.id} className="ripple" style={{ width: ripple.d, height: ripple.d, left: ripple.x, top: ripple.y }} />
+                  )}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
+        <div className="qnav">
+          <button id="pv" disabled={i === 0} onClick={() => { if (i > 0) { haptic(); goto(i - 1, "l"); } }}><Icon n="back" /> Anterior</button>
+          <span className="hint">o que mais se aproxima de você hoje</span>
+          <button id="nxq" disabled={sel == null} onClick={() => { if (sel == null) return; haptic(); i < 24 ? goto(i + 1, "r") : fim(); }}>Próxima <Icon n="chev" /></button>
+        </div>
       </div>
-      <div className="qnav">
-        <button id="pv" disabled={i === 0} onClick={() => { if (i > 0) { haptic(); goto(i - 1, "l"); } }}><Icon n="back" /> Anterior</button>
-        <span className="hint">o que mais se aproxima de você hoje</span>
-        <button id="nxq" disabled={sel == null} onClick={() => { if (sel == null) return; haptic(); i < 24 ? goto(i + 1, "r") : fim(); }}>Próxima <Icon n="chev" /></button>
-      </div>
+
+      <aside className="gauge" aria-hidden="true">
+        <div className="track">
+          {[...ZONAS, [100, "Respostas"]].map(([m, nome]) => (
+            <div key={m} className="mk" style={{ top: `${m}%` }}><b>{m} m</b>{nome}</div>
+          ))}
+          <div className="orb2" style={{ top: `${profundidade}%` }} />
+        </div>
+      </aside>
     </div>
   );
 }

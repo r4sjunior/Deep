@@ -1,9 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import Icon from "../components/Icon.jsx";
 import Radar from "../components/Radar.jsx";
-import { Page, Topo } from "../components/Chrome.jsx";
+import { Page, Topo, Split } from "../components/Chrome.jsx";
+import { gerarCard } from "../lib/card.js";
 import { useApp, S, commit } from "../lib/store.js";
-import { cena, haptic, toast } from "../lib/ui.jsx";
+import { cena, haptic, toast, modal } from "../lib/ui.jsx";
 import { definir, ir } from "../lib/nav.js";
 import { refazerTeste } from "../lib/acoes.jsx";
 import { perfil, respondidas, testeOk, nomesTop } from "../lib/regras.js";
@@ -90,17 +91,40 @@ export default function Perfil({ anim }) {
     } catch (e) { /* cancelado */ }
   };
 
-  return (
-    <Page anim={anim}>
-      <Topo back={false} titulo="Seu perfil" />
-      <div className="prof-hero">
-        <img src={P.img} alt={P.nome} />
-        <div className="in">
-          <div className="eyebrow">{S.nome ? S.nome + " · " : ""}perfil predominante hoje</div>
-          <div className="big">{pct[top[0]]}%</div>
-          <h1 className="display">{nomesTop(top)}</h1>
+  const abrirCard = async () => {
+    haptic();
+    toast("Preparando seu card…", "spark");
+    let blob;
+    try { blob = await gerarCard(); } catch (e) { toast("Não foi possível gerar o card", "close"); return; }
+    const url = URL.createObjectURL(blob);
+    const arquivo = new File([blob], "meu-perfil-deep.png", { type: "image/png" });
+    const podeEnviar = !!(navigator.canShare && navigator.canShare({ files: [arquivo] }));
+    const enviar = async () => {
+      try { await navigator.share({ files: [arquivo], title: "Meu perfil DEEP" }); } catch (e) { /* cancelado */ }
+    };
+    modal((close) => (
+      <div className="sheet story">
+        <div className="grab" />
+        <div className="eyebrow">Card para Stories</div>
+        <h3 className="display" style={{ fontSize: 26, margin: "6px 0 16px" }}>Seu perfil, pronto para compartilhar</h3>
+        <img src={url} alt="Card do seu perfil DEEP" id="cardimg" />
+        <div className="row">
+          <a className="btn line" href={url} download="meu-perfil-deep.png" onClick={() => setTimeout(close, 300)}><Icon n="down" /> Baixar</a>
+          {podeEnviar
+            ? <button className="btn gold" onClick={enviar}><Icon n="share" /> Enviar</button>
+            : <button className="btn gold" onClick={close}>Fechar</button>}
         </div>
       </div>
+    ));
+  };
+
+  return (
+    <Split aba anim={anim} titulo="Seu perfil" img={P.img} alt={P.nome}
+      over={<>
+        <div className="eyebrow">{S.nome ? S.nome + " · " : ""}perfil predominante hoje</div>
+        <div className="big">{pct[top[0]]}%</div>
+        <h1 className="display">{nomesTop(top)}</h1>
+      </>}>
 
       <div className="seg" id="seg" role="tablist" ref={segRef}>
         {SEGS.map(([k, l]) => (
@@ -168,10 +192,11 @@ export default function Perfil({ anim }) {
         ))}
       </div>
 
-      <div className="row" style={{ marginTop: 22 }}>
+      <button className="btn gold block" id="story" style={{ marginTop: 24 }} onClick={abrirCard}><Icon n="spark" /> Criar meu card para Stories</button>
+      <div className="row" style={{ marginTop: 10 }}>
         <button className="btn line" id="refaz" onClick={() => refazerTeste(BASE_TESTE)}><Icon n="redo" /> Refazer</button>
-        <button className="btn plum" id="share" onClick={compartilhar}><Icon n="share" /> Compartilhar</button>
+        <button className="btn plum" id="share" onClick={compartilhar}><Icon n="share" /> Texto</button>
       </div>
-    </Page>
+    </Split>
   );
 }

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import Icon from "../components/Icon.jsx";
-import { Page, Topo } from "../components/Chrome.jsx";
+import { Split } from "../components/Chrome.jsx";
 import { useApp, S, commit, resetar } from "../lib/store.js";
 import { cena, modal, confirmar, toast } from "../lib/ui.jsx";
 import { definir } from "../lib/nav.js";
@@ -49,16 +49,12 @@ export default function Ita({ anim }) {
     );
 
   return (
-    <Page anim={anim}>
-      <Topo back={false} titulo="Ita Batista" />
-      <div className="author-hero">
-        <img src="img/autora.jpg" alt="Ita Batista" />
-        <div className="in">
-          <div className="eyebrow">A autora</div>
-          <div className="sign">Ita Batista</div>
-          <p className="sub" style={{ fontSize: 15, marginTop: 4 }}>Mentora, Analista Comportamental, Coach e Especialista em Eneagrama Master Practitioner</p>
-        </div>
-      </div>
+    <Split aba anim={anim} titulo="Ita Batista" img="img/autora.jpg" alt="Ita Batista" artCls="author"
+      over={<>
+        <div className="eyebrow">A autora</div>
+        <div className="sign">Ita Batista</div>
+        <p className="sub" style={{ fontSize: 15, marginTop: 4 }}>Mentora, Analista Comportamental, Coach e Especialista em Eneagrama Master Practitioner</p>
+      </>}>
       <div className="stagger">
         <div className="read sub" style={{ marginTop: 18 }}>
           <p>Por muito tempo, procurei respostas fora. Foi nessa busca que o autoconhecimento deixou de ser apenas um interesse e passou a fazer parte da minha própria jornada.</p>
@@ -99,6 +95,6 @@ export default function Ita({ anim }) {
           </button>
         </div>
       </div>
-    </Page>
+    </Split>
   );
 }

@@ -1,5 +1,6 @@
 import Oceano from "./components/Oceano.jsx";
-import { Modal, Side, Tabs, Toast } from "./components/Chrome.jsx";
+import { Modal, Tabs, Toast } from "./components/Chrome.jsx";
+import VigiaConquistas from "./components/VigiaConquistas.jsx";
 import { nav } from "./lib/nav.js";
 import { Splash, Onboarding } from "./screens/Inicio.jsx";
 import Jornada from "./screens/Jornada.jsx";
@@ -23,26 +24,31 @@ const ROTAS = {
   revela: Revela
 };
 
+/** Telas internas que mantêm o menu lateral nas telas largas. */
+const COM_MENU = new Set(["fase", "ex", "ler", "testeIntro"]);
+
 export default function App() {
   const { pilha, anim, key } = nav.use();
   const topo = pilha[pilha.length - 1];
-  const Tela = topo.rota === "aba" ? ABAS[topo.arg] : ROTAS[topo.rota];
-  const abaAtiva = topo.rota === "aba" ? topo.arg : null;
+  const naAba = topo.rota === "aba";
+  const Tela = naAba ? ABAS[topo.arg] : ROTAS[topo.rota];
+  const raiz = pilha[0]?.rota === "aba" ? pilha[0].arg : "jornada";
+  const modo = naAba ? "aba" : COM_MENU.has(topo.rota) ? "sub" : null;
 
   return (
     <>
       <Oceano />
-      <Side />
       <div id="shell">
         {/* a key remonta a área de rolagem a cada troca de tela (volta ao topo) */}
         <main id="view" key={key}>
           <Tela arg={topo.arg} anim={anim} />
         </main>
-        <Tabs ativa={abaAtiva} />
+        <Tabs ativa={naAba ? topo.arg : raiz} modo={modo} />
         <Modal />
         <div id="fx" />
         <Toast />
       </div>
+      <VigiaConquistas />
     </>
   );
 }

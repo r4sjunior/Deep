@@ -1,8 +1,9 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import Icon from "../components/Icon.jsx";
-import { Page, Topo } from "../components/Chrome.jsx";
+import { Split, Placas } from "../components/Chrome.jsx";
 import { useApp, S, persistir } from "../lib/store.js";
-import { cena, haptic, toast, bolhas, confirmar } from "../lib/ui.jsx";
+import { cena, haptic, toast, bolhas, confirmar, reduz } from "../lib/ui.jsx";
 import { voltarHist } from "../lib/nav.js";
 import { abrirPasso, concluirPasso, luz } from "../lib/acoes.jsx";
 import { faseDe, infoPasso, passoFeito, passoLivre, palavras, escreveuEm } from "../lib/regras.js";
@@ -22,16 +23,19 @@ export function Fase({ arg: id, anim }) {
   };
 
   return (
-    <Page anim={anim} cls="notab">
-      <Topo titulo={f.nome} />
-      <div className="hero">
-        <img src={f.img} alt="" />
-        <div className="in">
-          <div className="eyebrow">Fase {i + 1} do game · {f.prof}</div>
-          <h1 className="display">{f.titulo}</h1>
-          <p className="lead">{f.lead}</p>
-        </div>
-      </div>
+    <Split anim={anim} titulo={f.nome} img={f.img}
+      over={<>
+        <div className="eyebrow">Fase {i + 1} do game · {f.prof}</div>
+        <h1 className="display">{f.titulo}!!!</h1>
+        <p className="lead">{f.lead}</p>
+      </>}
+      dock={j0 >= 0 ? (
+        <button className="btn gold block" id="go" onClick={() => { haptic(); bolhas(10); abrirPasso(f, j0); }}>
+          {f.passos.some(passoFeito) ? "Continuar" : "Mergulhar"} · passo {j0 + 1}
+        </button>
+      ) : (
+        <button className="btn line block" onClick={() => { haptic(); voltarHist(); }}><Icon n="check" /> Fase concluída</button>
+      )}>
       <div className="stagger">
         <div className="read sub" style={{ marginTop: 18 }}>{f.texto.map((t, k) => <p key={k}>{t}</p>)}</div>
         <div className="quote" style={{ margin: "20px 0 6px" }}>{f.citacao}</div>
@@ -52,16 +56,7 @@ export function Fase({ arg: id, anim }) {
           })}
         </div>
       </div>
-      <div className="dock">
-        {j0 >= 0 ? (
-          <button className="btn gold block" id="go" onClick={() => { haptic(); bolhas(10); abrirPasso(f, j0); }}>
-            {f.passos.some(passoFeito) ? "Continuar" : "Mergulhar"} · passo {j0 + 1}
-          </button>
-        ) : (
-          <button className="btn line block" onClick={() => { haptic(); voltarHist(); }}><Icon n="check" /> Fase concluída</button>
-        )}
-      </div>
-    </Page>
+    </Split>
   );
 }
 
@@ -79,10 +74,39 @@ function Caderno({ id, valor, onChange }) {
   );
 }
 
+/** "Então respire fundo… e simplesmente escreva." — três respirações guiadas antes de escrever. */
+function Respiracao({ onFim }) {
+  const [fase, setFase] = useState(0); // 0..5 → inspira/expira × 3
+  useEffect(() => {
+    if (reduz) return;
+    if (fase >= 6) { onFim(); return; }
+    const t = setTimeout(() => setFase((n) => n + 1), 4000);
+    return () => clearTimeout(t);
+  }, [fase]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  return createPortal(
+    <div className="breath" role="dialog" aria-label="Respiração guiada">
+      <div className="box">
+        <div className="eyebrow">Antes de escrever</div>
+        <h2 className="display" style={{ fontSize: 30, margin: "8px 0 4px" }}>Respire fundo…</h2>
+        <p className="sub">e simplesmente escreva. Acompanhe a luz por três respirações.</p>
+        <div className="bcirc"><b>{reduz ? "Respire" : fase % 2 === 0 ? "Inspire" : "Expire"}</b></div>
+        <div className="cnt">{reduz ? "no seu tempo" : `${Math.min(3, Math.floor(fase / 2) + 1)} de 3`}</div>
+        <div className="row">
+          <button className="btn line" id="pular" onClick={onFim}>Pular</button>
+          <button className="btn gold" onClick={onFim}>Estou pronto(a)</button>
+        </div>
+      </div>
+    </div>,
+    document.getElementById("shell")
+  );
+}
+
 export function Exercicio({ arg: { f, k }, anim }) {
   const e = EX[k], F = faseDe(f);
   const [textos, setTextos] = useState(() => ({ ...(S.textos[k] || {}) }));
   const [salvo, setSalvo] = useState(false);
+  const [respirar, setRespirar] = useState(() => !S.feito[k] && !escreveuEm(k));
   const tSalvo = useRef(0);
 
   useEffect(() => {
@@ -115,32 +139,38 @@ export function Exercicio({ arg: { f, k }, anim }) {
   };
 
   return (
-    <Page anim={anim} cls="notab">
-      <Topo titulo={"Exercício " + e.n} />
-      <div className="ex-head"><img src={e.img} alt="" /></div>
-      <div className="paper pad ex-card">
-        <div className="eyebrow">Exercício {e.n} · {F.nome}</div>
-        <h2 className="display" style={{ margin: "6px 0 12px" }}>{e.titulo}</h2>
-        <div className="read">{e.intro.map((p, i) => <p key={i}>{p}</p>)}</div>
-        {e.campos.map(([c, l], i) => {
-          const n = palavras(textos[c]);
-          return (
-            <label className="field" key={c}>
-              <div className="prompt">{e.campos.length > 1 && <i>{i + 1}</i>}{l}</div>
-              <Caderno id={c} valor={textos[c] || ""} onChange={(v) => escrever(c, v)} />
-              <div className="wc">{n ? `${n} palavra${n > 1 ? "s" : ""}` : ""}</div>
-            </label>
-          );
-        })}
-        <p className="sub" style={{ fontSize: 15, marginTop: 14, fontStyle: "italic" }}>Sem julgamentos. Sem críticas. Sem medo de errar.</p>
-      </div>
-      <div className="dock">
-        <div className="row" style={{ alignItems: "center" }}>
-          <span className={"saved" + (salvo ? " on" : "")} style={{ flex: "0 0 auto" }}><Icon n="check" /> Salvo</span>
-          <button className="btn gold" id="ok" onClick={concluir}>{S.feito[k] ? "Salvar e voltar" : "Concluir exercício"}</button>
+    <>
+      <Split anim={anim} short titulo={"Exercício " + e.n} img={e.img}
+        over={<Placas a={`Exercício ${e.n}`} b={e.titulo} />}
+        dock={
+          <div className="row" style={{ alignItems: "center" }}>
+            <span className={"saved" + (salvo ? " on" : "")} style={{ flex: "0 0 auto" }}><Icon n="check" /> Salvo</span>
+            <button className="btn gold" id="ok" onClick={concluir}>{S.feito[k] ? "Salvar e voltar" : "Concluir exercício"}</button>
+          </div>
+        }>
+        <div className="paper pad ex-card">
+          <span className="wm" aria-hidden="true">Exercício {e.n}</span>
+          <div className="eyebrow">Exercício {e.n} · {F.nome}</div>
+          <h2 className="display" style={{ margin: "6px 0 12px" }}>{e.titulo}</h2>
+          <div className="read">{e.intro.map((p, i) => <p key={i}>{p}</p>)}</div>
+          <div className="lembre">
+            <h4>Lembre-se:</h4>
+            <p>{e.lembre} <b>Sem julgamentos. Sem críticas. Sem medo de errar.</b></p>
+          </div>
+          {e.campos.map(([c, l], i) => {
+            const n = palavras(textos[c]);
+            return (
+              <label className="field" key={c}>
+                <div className="prompt">{e.campos.length > 1 && <i>{i + 1}</i>}{l}</div>
+                <Caderno id={c} valor={textos[c] || ""} onChange={(v) => escrever(c, v)} />
+                <div className="wc">{n ? `${n} palavra${n > 1 ? "s" : ""}` : ""}</div>
+              </label>
+            );
+          })}
         </div>
-      </div>
-    </Page>
+      </Split>
+      {respirar && <Respiracao onFim={() => { setRespirar(false); bolhas(8); }} />}
+    </>
   );
 }
 
@@ -153,17 +183,15 @@ export function Leitura({ arg: { f, k }, anim }) {
     concluirPasso(f, k);
   };
   return (
-    <Page anim={anim} cls="notab">
-      <Topo titulo="Leitura" />
-      <div className="ex-head"><img src={l.img} alt="" /></div>
+    <Split anim={anim} short titulo="Leitura" img={l.img}
+      over={<Placas a="Leitura" b={l.titulo} />}
+      dock={<button className="btn gold block" id="ok" onClick={concluir}>{S.feito[k] ? "Voltar" : "Concluir leitura"}</button>}>
       <div className="paper pad ex-card">
+        <span className="wm" aria-hidden="true">{F.nome}</span>
         <div className="eyebrow">{F.nome} · leitura</div>
         <h2 className="display" style={{ margin: "6px 0 14px" }}>{l.titulo}</h2>
         <div className="read">{l.corpo}</div>
       </div>
-      <div className="dock">
-        <button className="btn gold block" id="ok" onClick={concluir}>{S.feito[k] ? "Voltar" : "Concluir leitura"}</button>
-      </div>
-    </Page>
+    </Split>
   );
 }

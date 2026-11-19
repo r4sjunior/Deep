@@ -67,7 +67,7 @@ export function Onboarding() {
           <h2 className="display">Um material para ser vivido</h2>
           <p className="sub">Criado por Ita Batista a partir do Método DEEP, para conduzir você a um mergulho mais profundo em si — respeitando seu tempo, sua história e seu processo.</p>
         </section>
-        <section className="slide">
+        <section className="slide txt">
           <div className="eyebrow" style={{ marginTop: 12 }}>Como funciona</div>
           <h2 className="display" style={{ marginTop: 8 }}>Quatro fases, um game</h2>
           <p className="sub">Como num jogo de tabuleiro ou um game no computador: cada fase desbloqueia a próxima, e a cada passo você acende luzes de consciência.</p>
@@ -77,7 +77,7 @@ export function Onboarding() {
             ))}
           </div>
         </section>
-        <section className="slide">
+        <section className="slide txt">
           <div className="eyebrow" style={{ marginTop: 12 }}>Antes de começar</div>
           <h2 className="display" style={{ marginTop: 8 }}>Um combinado com você</h2>
           <div className="quote" style={{ margin: "14px 0 16px" }}>Que você se permita viver esta jornada despindo-se de julgamentos e críticas — somente mergulhando. Pode ser?</div>

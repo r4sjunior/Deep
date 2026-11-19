@@ -3,7 +3,8 @@ import Icon from "./Icon.jsx";
 import { useApp, S } from "../lib/store.js";
 import { ui, haptic } from "../lib/ui.jsx";
 import { aba, voltarHist } from "../lib/nav.js";
-import { testeOk } from "../lib/regras.js";
+import { testeOk, proximoPasso, faseFeita } from "../lib/regras.js";
+import { FASES } from "../data/jornada.jsx";
 
 /** Contador de "luzes de consciência", com um pulo a cada ponto ganho. */
 export function Luz() {
@@ -50,11 +51,23 @@ export function Topo({ back = true, titulo = "" }) {
 
 const ABAS = [["jornada", "compass", "Jornada"], ["perfil", "user", "Perfil"], ["diario", "book", "Diário"], ["ita", "heart", "Ita"]];
 
-export function Tabs({ ativa }) {
+/**
+ * Navegação principal. No celular é a barra flutuante de baixo; em telas largas vira
+ * menu lateral com a marca e o progresso.
+ * modo: "aba" (sempre visível), "sub" (só no menu lateral) ou null (escondida).
+ */
+export function Tabs({ ativa, modo }) {
   useApp();
   const novoPerfil = testeOk() && !S.vistoPerfil;
+  const nx = proximoPasso();
+  const feitas = FASES.filter(faseFeita).length;
   return (
-    <nav id="tabs" className={ativa ? "" : "hide"} aria-label="Navegação principal">
+    <nav id="tabs" className={modo === "aba" ? "" : modo === "sub" ? "sub" : "hide"} aria-label="Navegação principal">
+      <div className="brand">
+        <img src="img/logo.png" alt="" />
+        <div className="display">DEEP</div>
+        <div className="sign">Ita Batista</div>
+      </div>
       {ABAS.map(([k, i, l]) => (
         <button
           key={k}
@@ -69,7 +82,45 @@ export function Tabs({ ativa }) {
           {k === "perfil" && novoPerfil && ativa !== "perfil" && <span className="dot" />}
         </button>
       ))}
+      <div className="railfoot">
+        <div className="eyebrow">{nx ? "Fase atual" : "Jornada completa"}</div>
+        <strong>{nx ? nx.f.nome : "Método DEEP"}</strong>
+        <div className="mini"><i style={{ width: `${(feitas / 4) * 100}%` }} /></div>
+        <Luz />
+      </div>
     </nav>
+  );
+}
+
+/**
+ * Tela "página aberta": ilustração + conteúdo. No celular a ilustração vira o topo da tela;
+ * em telas largas fica fixa à esquerda, como a página ilustrada do livro.
+ */
+export function Split({ anim, titulo, img, alt = "", over, short = false, aba = false, artCls = "", children, dock }) {
+  return (
+    <Page anim={anim} cls={aba ? "" : "notab"}>
+      <Topo back={!aba} titulo={titulo} />
+      <div className={"split" + (short ? " short" : "")}>
+        <div className={"art " + artCls}>
+          <img src={img} alt={alt} />
+          {over && <div className="in">{over}</div>}
+        </div>
+        <div className="body">
+          {children}
+          {dock && <div className="dock">{dock}</div>}
+        </div>
+      </div>
+    </Page>
+  );
+}
+
+/** Placas ameixa + ocre, como os títulos de exercício do e-book. */
+export function Placas({ a, b }) {
+  return (
+    <div className="plates">
+      <span className="p1">{a}</span>
+      {b && <span className="p2">{b}</span>}
+    </div>
   );
 }
 

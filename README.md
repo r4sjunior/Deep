@@ -6,6 +6,18 @@ Mini app (PWA) baseado no e-book **DEEP**, de Ita Batista. A pessoa:
 - escreve os exercícios do livro num diário;
 - faz o teste de perfil comportamental, que revela Águia, Gato, Tubarão ou Lobo.
 
+Recursos:
+- **Carta do dia:** uma frase do livro tirada ao acaso, uma vez por dia.
+- **Respiração guiada:** antes de cada exercício de escrita.
+- **Mergulho de 100 m no teste:** medidor de profundidade e marcos a cada 25 m.
+- **Conquistas:** medalhas pelo caminho.
+- **Card do perfil para Stories:** imagem de 1080×1920 para baixar ou enviar.
+
+O layout é responsivo:
+- **Celular:** abas embaixo.
+- **Tablet em pé:** menu lateral e uma coluna larga.
+- **Telas deitadas e computador:** "página aberta", com a ilustração de um lado e o conteúdo do outro.
+
 Feito com **React 18 + Vite 6**. Pode ser instalado na tela inicial do celular e funciona offline.
 
 ## Rodar
@@ -29,7 +41,8 @@ public/img/            ilustrações do e-book, logo e ícones
 src/
   main.jsx             ponto de entrada
   App.jsx              casca do app: fundo, telas, abas, modal e toast
-  styles.css           todo o visual (cores, tipografia, animações)
+  styles.css           visual base (cores, tipografia, componentes, animações)
+  layout.css           identidade do livro, layout responsivo e telas largas
   data/
     perfis.js          Águia, Gato, Tubarão e Lobo (textos do livro)
     perguntas.js       as 25 perguntas do teste
@@ -40,6 +53,8 @@ src/
     nav.js             pilha de telas + botão "voltar" do aparelho
     ui.jsx             toast, modal, cena de fundo e efeitos
     acoes.jsx          luzes, comemoração de fase, PDF e refazer o teste
+    conquistas.js      medalhas
+    card.js            gera o card do perfil para Stories
   components/          Oceano (fundo animado), Radar, Icon e barras
   screens/             Inicio, Jornada, Fase, Teste, Perfil, Diario e Ita
 ```

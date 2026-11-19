@@ -31,7 +31,9 @@ export const novo = () => ({
   fases: {},
   luzes: 0,
   inicio: false,
-  vistoPerfil: false
+  vistoPerfil: false,
+  carta: null,
+  medalhas: []
 });
 
 function carregar() {
